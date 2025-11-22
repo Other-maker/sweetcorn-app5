@@ -1,0 +1,904 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cob Corn - Updated POS System V2</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #e63946, #f1faee);
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo { font-size: 24px; font-weight: bold; }
+
+        .header-info {
+            display: flex;
+            gap: 20px;
+            font-size: 14px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .tabs {
+            display: flex;
+            background: white;
+            border-bottom: 2px solid #ddd;
+            gap: 0;
+            margin-bottom: 20px;
+            border-radius: 8px 8px 0 0;
+            overflow-x: auto;
+        }
+
+        .tab-btn {
+            padding: 12px 20px;
+            background: white;
+            border: none;
+            border-bottom: 3px solid transparent;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            color: #666;
+            white-space: nowrap;
+            transition: all 0.3s;
+        }
+
+        .tab-btn:hover { background: #f8f9fa; }
+
+        .tab-btn.active {
+            border-bottom-color: #e63946;
+            color: #e63946;
+            background: white;
+            font-weight: bold;
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s;
+        }
+
+        .tab-content.active { display: block; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .billing-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 350px;
+            gap: 20px;
+        }
+
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .card-header {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #333;
+            border-bottom: 2px solid #e63946;
+            padding-bottom: 10px;
+        }
+
+        .form-group { margin-bottom: 12px; }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            font-size: 12px;
+            color: #333;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            font-family: inherit;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #e63946;
+            box-shadow: 0 0 5px rgba(230, 57, 70, 0.3);
+        }
+
+        .quick-items {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .quick-item {
+            background: #f8f9fa;
+            border: 2px solid #ddd;
+            padding: 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.3s;
+            font-size: 13px;
+        }
+
+        .quick-item:hover {
+            background: #e8f4f8;
+            border-color: #e63946;
+            transform: translateY(-2px);
+        }
+
+        .quick-item-name {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .quick-item-price {
+            color: #e63946;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .btn {
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: #e63946;
+            color: white;
+            width: 100%;
+            margin-bottom: 5px;
+        }
+
+        .btn-primary:hover { background: #d62828; }
+
+        .btn-success {
+            background: #06a77d;
+            color: white;
+        }
+
+        .btn-danger {
+            background: #d32f2f;
+            color: white;
+        }
+
+        .payment-methods {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .payment-option { display: none; }
+
+        .payment-label {
+            display: block;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .payment-option:checked + .payment-label {
+            background: #e63946;
+            color: white;
+            border-color: #e63946;
+        }
+
+        /* Payment Received Button */
+        .payment-received-btn {
+            display: block;
+            padding: 14px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: white;
+            color: #666;
+            font-weight: 600;
+            font-size: 15px;
+            width: 100%;
+        }
+
+        .payment-received-btn.active {
+            background: #06a77d;
+            color: white;
+            border-color: #06a77d;
+        }
+
+        .summary-box {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 13px;
+        }
+
+        .summary-row.total {
+            border-top: 2px solid #ddd;
+            padding-top: 8px;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .order-items {
+            max-height: 300px;
+            overflow-y: auto;
+            margin-bottom: 15px;
+        }
+
+        .empty-state {
+            text-align: center;
+            color: #999;
+            padding: 40px 0;
+        }
+
+        .pending-orders-inline {
+            max-height: 400px;
+            overflow-y: auto;
+            margin-top: 10px;
+        }
+
+        .inventory-display {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 15px;
+        }
+
+        .inventory-card {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border-left: 4px solid #06a77d;
+        }
+
+        .stock-ok {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .stock-alert {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .hidden { display: none; }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+            margin-top: 10px;
+        }
+
+        th {
+            background: #f8f9fa;
+            padding: 10px;
+            text-align: left;
+            font-weight: 600;
+            border-bottom: 2px solid #ddd;
+        }
+
+        td {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .eod-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .eod-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .eod-stat {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #e63946;
+        }
+
+        .eod-stat-label {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .eod-stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .report-cards {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .report-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border-left: 4px solid #e63946;
+        }
+
+        .report-label {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .report-value {
+            font-size: 28px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .report-subvalue {
+            font-size: 12px;
+            color: #999;
+            margin-top: 5px;
+        }
+
+        @media (max-width: 1024px) {
+            .billing-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+            .eod-grid, .report-cards {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .billing-grid {
+                grid-template-columns: 1fr;
+            }
+            .quick-items {
+                grid-template-columns: 1fr;
+            }
+            .eod-grid, .report-cards {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media print {
+            body * { visibility: hidden; }
+            .print-bill, .print-bill * { visibility: visible; }
+            .print-bill { position: absolute; left: 0; top: 0; width: 80mm; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">🌽 Cob Corn POS</div>
+        <div class="header-info">
+            <div>Today: <span id="todayDate"></span></div>
+            <div id="currentTime"></div>
+            <div>💵 Cash: ₹<span id="todayCash">0</span></div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="billing" onclick="switchTab(event, 'billing')">📋 New Order</button>
+            <button class="tab-btn" data-tab="inventory" onclick="switchTab(event, 'inventory')">📊 Inventory</button>
+            <button class="tab-btn" data-tab="reconciliation" onclick="switchTab(event, 'reconciliation')">🔄 End-of-Day</button>
+            <button class="tab-btn" data-tab="reports" onclick="switchTab(event, 'reports')">📈 Reports</button>
+            <button class="tab-btn" data-tab="expenses" onclick="switchTab(event, 'expenses')">💰 Expenses</button>
+            <button class="tab-btn" data-tab="settings" onclick="switchTab(event, 'settings')">⚙️ Settings</button>
+        </div>
+
+        <!-- NEW ORDER TAB -->
+        <div id="billing" class="tab-content active">
+            <div class="billing-grid">
+                <!-- Order Entry -->
+                <div class="card">
+                    <div class="card-header">Customer Order Entry</div>
+
+                    <label>Quick Add Items</label>
+                    <div class="quick-items" id="quickItems"></div>
+
+                    <div class="form-group">
+                        <label>Select Item</label>
+                        <select id="itemSelect" onchange="addItemToOrder()">
+                            <option>-- Select Item --</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Quantity</label>
+                        <input type="number" id="quantity" value="1" min="1">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Customer Name (Optional)</label>
+                        <input type="text" id="customerName" placeholder="e.g., John">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Special Notes</label>
+                        <textarea id="specialNotes" rows="3" placeholder="e.g., Extra spice"></textarea>
+                    </div>
+                </div>
+
+                <!-- Payment & Status -->
+                <div class="card">
+                    <div class="card-header">Payment & Status</div>
+
+                    <label>Payment Method</label>
+                    <div class="payment-methods">
+                        <div>
+                            <input type="radio" name="payment" id="cash" class="payment-option" value="cash" checked>
+                            <label for="cash" class="payment-label">💵 Cash</label>
+                        </div>
+                        <div>
+                            <input type="radio" name="payment" id="upi" class="payment-option" value="upi">
+                            <label for="upi" class="payment-label">📱 UPI/Digital</label>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Amount (₹)</label>
+                        <input type="number" id="amount" readonly value="0" step="0.01">
+                    </div>
+
+                    <label>Payment Status</label>
+                    <button class="payment-received-btn" id="paymentReceivedBtn" onclick="togglePaymentReceivedAndSave()">
+                        ⏱ Payment Pending
+                    </button>
+
+                    <button class="btn btn-success" onclick="printBill()" style="background:#06a77d; width:100%; margin-bottom:5px;">🖨️ Print Bill</button>
+                    <button class="btn" style="background:#f8f9fa; color:#333; border:1px solid #ddd; width:100%;" onclick="resetForm()">🔄 Clear Form</button>
+
+                    <!-- Pending Orders Inline -->
+                    <div style="margin-top: 20px;">
+                        <div class="card-header" style="margin-bottom: 10px;">📋 Pending Orders</div>
+                        <div class="pending-orders-inline" id="pendingOrdersInline">
+                            <div class="empty-state" style="padding: 20px 0; font-size: 12px;">📭 No pending</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Order Summary -->
+                <div class="card">
+                    <div class="card-header">Order Summary</div>
+
+                    <div class="order-items" id="orderItems">
+                        <div class="empty-state">📝 No items</div>
+                    </div>
+
+                    <div class="summary-box">
+                        <div class="summary-row">
+                            <span>Subtotal:</span>
+                            <span>₹<span id="subtotal">0</span></span>
+                        </div>
+                        <div class="summary-row">
+                            <span>Tax:</span>
+                            <span>₹<span id="tax">0</span></span>
+                        </div>
+                        <div class="summary-row total">
+                            <span>TOTAL:</span>
+                            <span>₹<span id="totalAmount">0</span></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- INVENTORY TAB -->
+        <div id="inventory" class="tab-content">
+            <div class="card">
+                <div class="card-header">📊 Inventory Management</div>
+                <p style="margin-bottom: 15px; color: #666; font-size: 13px;">
+                    <strong>Auto-deduction:</strong> Inventory automatically reduces when orders are FULFILLED. Opening stock = Yesterday's closing stock.
+                </p>
+
+                <button class="btn btn-success" onclick="addInventoryItem()" style="margin-bottom:15px; max-width:300px;">
+                    ➕ Add New Inventory Item
+                </button>
+
+                <div class="inventory-display" id="inventoryDisplay"></div>
+            </div>
+        </div>
+
+        <!-- END-OF-DAY TAB -->
+        <div id="reconciliation" class="tab-content">
+            <div class="card-header" style="margin-bottom: 20px;">🔄 End-of-Day Reconciliation</div>
+
+            <!-- Financial Reconciliation -->
+            <div class="eod-card">
+                <h3 style="margin-bottom: 15px;">Financial Reconciliation</h3>
+                <div class="eod-grid">
+                    <div class="eod-stat">
+                        <div class="eod-stat-label">System Total</div>
+                        <div class="eod-stat-value">₹<span id="eodSystemTotal">0</span></div>
+                    </div>
+                    <div class="eod-stat">
+                        <div class="eod-stat-label">Total Cash Sales</div>
+                        <div class="eod-stat-value">₹<span id="eodCashSales">0</span></div>
+                    </div>
+                    <div class="eod-stat">
+                        <div class="eod-stat-label">Total Online Sales</div>
+                        <div class="eod-stat-value">₹<span id="eodOnlineSales">0</span></div>
+                    </div>
+                    <div class="eod-stat" style="border-left-color: #06a77d;">
+                        <div class="eod-stat-label">Actual Cash in Hand</div>
+                        <input type="number" id="eodActualCash" placeholder="Enter actual" 
+                            oninput="calculateEODCashVariance()"
+                            style="width:100%; padding:8px; font-size:18px; font-weight:bold; border:2px solid #ddd; border-radius:5px; margin-top:5px;">
+                        <div style="margin-top:5px; font-size:13px;">Variance: <span id="eodCashVariance" style="font-weight:bold;">₹0</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Inventory Reconciliation -->
+            <div class="eod-card">
+                <h3 style="margin-bottom: 15px;">Physical Inventory vs System</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Item</th>
+                            <th>Opening</th>
+                            <th>Purchased</th>
+                            <th>Used</th>
+                            <th>Expected Closing</th>
+                            <th>Actual Closing</th>
+                            <th>Variance</th>
+                        </tr>
+                    </thead>
+                    <tbody id="eodInventoryTable"></tbody>
+                </table>
+                <button class="btn btn-primary" onclick="calculateEODInventoryVariance()" style="margin-top:15px; max-width:300px;">
+                    Calculate Inventory Variance
+                </button>
+            </div>
+
+            <!-- Sales Unit Reconciliation -->
+            <div class="eod-card">
+                <h3 style="margin-bottom: 15px;">Sales Unit Reconciliation</h3>
+
+                <div style="background:#f8f9fa; padding:15px; border-radius:8px; margin-bottom:15px;">
+                    <h4 style="margin-bottom:10px;">Cups Sold (Sweet Corn):</h4>
+                    <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:15px; align-items:end;">
+                        <div>
+                            <label style="font-size:12px; color:#666;">System Count</label>
+                            <div style="font-size:24px; font-weight:bold;" id="eodCupsSystem">0</div>
+                        </div>
+                        <div>
+                            <label style="font-size:12px; color:#666;">Physical Books Count</label>
+                            <input type="number" id="eodCupsPhysical" placeholder="Enter actual"
+                                oninput="calculateEODCupsVariance()"
+                                style="width:100%; padding:10px; font-size:16px; border:2px solid #ddd; border-radius:5px;">
+                        </div>
+                        <div>
+                            <label style="font-size:12px; color:#666;">Variance</label>
+                            <div style="font-size:24px; font-weight:bold; color:#e63946;" id="eodCupsVariance">0</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="background:#f8f9fa; padding:15px; border-radius:8px;">
+                    <h4 style="margin-bottom:10px;">Plates Sold (Nachos):</h4>
+                    <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:15px; align-items:end;">
+                        <div>
+                            <label style="font-size:12px; color:#666;">System Count</label>
+                            <div style="font-size:24px; font-weight:bold;" id="eodPlatesSystem">0</div>
+                        </div>
+                        <div>
+                            <label style="font-size:12px; color:#666;">Physical Books Count</label>
+                            <input type="number" id="eodPlatesPhysical" placeholder="Enter actual"
+                                oninput="calculateEODPlatesVariance()"
+                                style="width:100%; padding:10px; font-size:16px; border:2px solid #ddd; border-radius:5px;">
+                        </div>
+                        <div>
+                            <label style="font-size:12px; color:#666;">Variance</label>
+                            <div style="font-size:24px; font-weight:bold; color:#e63946;" id="eodPlatesVariance">0</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px; margin-top:20px;">
+                <button class="btn btn-primary" onclick="finalizeEOD()" style="padding:15px; font-size:16px;">
+                    ✓ Finalize & Save to Sheets
+                </button>
+                <button class="btn" style="background:#2196F3; color:white; padding:15px; font-size:16px;" onclick="alert('Download feature coming soon')">
+                    📥 Download Report
+                </button>
+            </div>
+        </div>
+
+        <!-- REPORTS TAB -->
+        <div id="reports" class="tab-content">
+            <div class="card">
+                <div class="card-header">📈 Sales Reports</div>
+
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px; margin-bottom:20px;">
+                    <div>
+                        <label>Report Period</label>
+                        <select id="reportPeriod" onchange="updateReports()" style="padding:10px;">
+                            <option value="daily">Daily</option>
+                            <option value="weekly">Weekly</option>
+                            <option value="monthly">Monthly</option>
+                            <option value="quarterly">Quarterly</option>
+                            <option value="yearly">Yearly</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label>Comparison</label>
+                        <select style="padding:10px;">
+                            <option>Week-on-Week</option>
+                            <option>Month-on-Month</option>
+                            <option>Year-on-Year</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="report-cards">
+                    <div class="report-card">
+                        <div class="report-label">Total Sales Today</div>
+                        <div class="report-value">₹<span id="reportTotalSales">0.00</span></div>
+                        <div class="report-subvalue"><span id="reportOrdersCount">0</span> Orders</div>
+                    </div>
+                    <div class="report-card" style="border-left-color:#06a77d;">
+                        <div class="report-label">Cash Transactions</div>
+                        <div class="report-value">₹<span id="reportCashTotal">0.00</span></div>
+                        <div class="report-subvalue"><span id="reportCashCount">0</span> Orders</div>
+                    </div>
+                    <div class="report-card" style="border-left-color:#2196F3;">
+                        <div class="report-label">Online Transactions</div>
+                        <div class="report-value">₹<span id="reportOnlineTotal">0.00</span></div>
+                        <div class="report-subvalue"><span id="reportOnlineCount">0</span> Orders</div>
+                    </div>
+                    <div class="report-card" style="border-left-color:#ff9800;">
+                        <div class="report-label">Average Order Value</div>
+                        <div class="report-value">₹<span id="reportAvgOrder">0.00</span></div>
+                        <div class="report-subvalue">Per Transaction</div>
+                    </div>
+                </div>
+
+                <h3 style="margin:20px 0 15px 0;">Item-wise Sales</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Item</th>
+                            <th>Qty Sold</th>
+                            <th>Revenue</th>
+                            <th>Avg Price</th>
+                        </tr>
+                    </thead>
+                    <tbody id="itemSalesTable">
+                        <tr><td colspan="4" style="text-align:center; color:#999;">No sales data</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- EXPENSES TAB -->
+        <div id="expenses" class="tab-content">
+            <div class="billing-grid" style="grid-template-columns: 1fr 1fr;">
+                <!-- Record Expense -->
+                <div class="card">
+                    <div class="card-header">💰 Record Expense</div>
+
+                    <div class="form-group">
+                        <label>Date</label>
+                        <input type="date" id="expenseDate" value="">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Category</label>
+                        <select id="expenseCategory">
+                            <option value="">-- Select Category --</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Description</label>
+                        <textarea id="expenseDescription" rows="2" placeholder="Brief description"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Amount (₹)</label>
+                        <input type="number" id="expenseAmount" placeholder="0.00" step="0.01">
+                    </div>
+
+                    <label>Payment Method</label>
+                    <div class="payment-methods">
+                        <div>
+                            <input type="radio" name="expensePayment" id="expenseCash" class="payment-option" value="cash" checked>
+                            <label for="expenseCash" class="payment-label">💵 Cash</label>
+                        </div>
+                        <div>
+                            <input type="radio" name="expensePayment" id="expenseOnline" class="payment-option" value="online">
+                            <label for="expenseOnline" class="payment-label">📱 Online</label>
+                        </div>
+                    </div>
+
+                    <button class="btn btn-primary" onclick="saveExpense()">💾 Save Expense</button>
+                </div>
+
+                <!-- Manage Categories & Recent -->
+                <div class="card">
+                    <div class="card-header">Manage Categories</div>
+
+                    <button class="btn btn-success" onclick="addExpenseCategory()" style="margin-bottom:15px;">+ Add New Category</button>
+
+                    <div id="expenseCategoriesList" style="margin-bottom:20px;"></div>
+
+                    <hr style="margin: 20px 0; border: none; border-top: 1px solid #ddd;">
+
+                    <div class="card-header" style="margin-top:0;">Recent Expenses</div>
+                    <div style="max-height:400px; overflow-y:auto;">
+                        <table style="font-size:12px;">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Category</th>
+                                    <th>Amount</th>
+                                    <th>Payment</th>
+                                </tr>
+                            </thead>
+                            <tbody id="recentExpenses"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SETTINGS TAB -->
+        <div id="settings" class="tab-content">
+            <div class="billing-grid" style="grid-template-columns: 1fr 1fr;">
+                <div class="card">
+                    <div class="card-header">Add Menu Item</div>
+                    <div class="form-group">
+                        <label>Item Name</label>
+                        <input type="text" id="newItemName" placeholder="e.g., Peri Peri Sweet Corn">
+                    </div>
+                    <div class="form-group">
+                        <label>Price (₹)</label>
+                        <input type="number" id="newItemPrice" step="0.01" placeholder="e.g., 60">
+                    </div>
+                    <div class="form-group">
+                        <label>Link to Inventory Item</label>
+                        <select id="newItemInventoryId">
+                            <option value="sweet-corn">Sweet Corn</option>
+                            <option value="nachos">Nachos</option>
+                            <option value="cups">Cups</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Consumption Per Unit (grams or pieces)</label>
+                        <input type="number" id="newItemConsumption" placeholder="e.g., 150" step="1">
+                    </div>
+                    <button class="btn btn-primary" onclick="addMenuItem()">+ Add Menu Item</button>
+
+                    <hr style="margin: 20px 0; border: none; border-top: 1px solid #ddd;">
+
+                    <div class="card-header" style="margin-top: 0;">Current Menu</div>
+                    <div id="menuList"></div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">Manage Inventory Items</div>
+
+                    <button class="btn btn-success" onclick="addInventoryItem()" style="margin-bottom:15px;">+ Add New Inventory Item</button>
+
+                    <div id="inventoryItemsList" style="margin-bottom:20px;"></div>
+
+                    <hr style="margin: 20px 0; border: none; border-top: 1px solid #ddd;">
+
+                    <div class="card-header" style="margin-top:0;">Google Sheets Integration</div>
+                    <div class="form-group">
+                        <label>Google Apps Script URL</label>
+                        <input type="text" id="googleURL" placeholder="https://script.google.com/...">
+                    </div>
+                    <button class="btn btn-primary" onclick="saveGoogleURL()">Save URL</button>
+                    <button class="btn" style="background:#f8f9fa; color:#333; border:1px solid #ddd; width:100%; margin-top:5px;" onclick="testGoogleConnection()">Test Connection</button>
+
+                    <hr style="margin: 20px 0; border: none; border-top: 1px solid #ddd;">
+
+                    <div class="card-header" style="margin-top:0;">Print Bill Settings</div>
+                    <div class="form-group">
+                        <label>Business Name</label>
+                        <input type="text" id="billBusinessName" placeholder="COB CORN">
+                    </div>
+                    <div class="form-group">
+                        <label>Address Line 1</label>
+                        <input type="text" id="billAddress1" placeholder="Kharadi">
+                    </div>
+                    <div class="form-group">
+                        <label>Address Line 2</label>
+                        <input type="text" id="billAddress2" placeholder="Pune-411014">
+                    </div>
+                    <div class="form-group">
+                        <label>Phone</label>
+                        <input type="text" id="billPhone" placeholder="+91-9876543210">
+                    </div>
+                    <button class="btn btn-primary" onclick="saveBillFormat()">Save Bill Format</button>
+
+                    <hr style="margin: 20px 0; border: none; border-top: 1px solid #ddd;">
+
+                    <div class="form-group">
+                        <label><strong>Export Data</strong></label>
+                        <button class="btn btn-primary" onclick="exportToCSV()" style="background:#06a77d;">📥 Export as CSV</button>
+                    </div>
+
+                    <hr style="margin: 20px 0; border: none; border-top: 1px solid #ddd;">
+
+                    <div class="form-group">
+                        <label><strong>⚠️ Clear Data</strong></label>
+                        <button class="btn btn-danger" onclick="clearTodayOrders()" style="width:100%;">Clear Today's Orders</button>
+                        <button class="btn btn-danger" onclick="clearAllData()" style="width:100%; margin-top:5px;">Clear ALL Data</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="printArea" class="hidden"></div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const today = new Date().toISOString().split('T')[0];
+            const expenseDateInput = document.getElementById('expenseDate');
+            if (expenseDateInput) expenseDateInput.value = today;
+        });
+    </script>
+    <script src="app-fixed-v3.js"></script>
+</body>
+</html>
